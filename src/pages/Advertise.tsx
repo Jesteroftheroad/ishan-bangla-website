@@ -72,7 +72,7 @@ export default function Advertise() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="pt-20"
+      className="pt-[100px]"
     >
 
       {/* ── HERO ── */}

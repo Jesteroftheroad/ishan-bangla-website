@@ -30,7 +30,7 @@ export default function Navbar() {
 
         {/* ── ROW 1: Main Navbar ── */}
         <div className="bg-[#0D0D0D] border-b border-white/[0.07]">
-          <div className="max-w-6xl mx-auto px-5 md:px-10 h-[72px] grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+          <div className="max-w-6xl mx-auto px-5 md:px-10 h-[72px] grid grid-cols-[auto_1fr_auto] items-center gap-4">
 
             {/* LEFT — Logo */}
             <Link to="/" className="flex items-center group">

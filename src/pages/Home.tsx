@@ -32,32 +32,6 @@ function useCounter(target: number, duration = 1800) {
   return { val, ref }
 }
 
-// ── Ticker ────────────────────────────────────────────────────────────────────
-const TICKER_ITEMS = [
-  'ঈশান বাংলা — বরাক উপত্যকার সবচেয়ে বিশ্বস্ত সংবাদ মাধ্যম',
-  'Reach 3 Million+ viewers · Silchar & Barak Valley',
-  'সর্বদা প্রথম — সর্বদা সঠিক · Always First. Always Accurate.',
-  'Advertising plans from ₹600 · FREE Cable TV included',
-  'WhatsApp your news story: +91 9395616617',
-]
-const tickerStr = TICKER_ITEMS.join('  ✦  ')
-
-function Ticker() {
-  return (
-    <div className="bg-[#D91C1C] border-b-2 border-[#0D0D0D] overflow-hidden h-9 flex items-center">
-      <span className="shrink-0 bg-[#0D0D0D] text-white font-mono text-[11px] uppercase tracking-[0.2em] px-4 h-full flex items-center border-r-2 border-[#D91C1C] whitespace-nowrap z-10">
-        ⚡ Breaking
-      </span>
-      <div className="flex-1 overflow-hidden">
-        <div className="ticker-inner flex gap-16 whitespace-nowrap w-max">
-          {[0, 1].map(i => (
-            <span key={i} className="font-bengali text-white text-sm">{tickerStr}</span>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
 function StatCard({
@@ -129,9 +103,6 @@ export default function Home() {
       transition={{ duration: 0.3 }}
       className="pt-[100px]"
     >
-      {/* ── TICKER ── */}
-      <Ticker />
-
       {/* ── HERO ── */}
       <section className="relative h-screen min-h-[680px] max-h-[1000px] flex flex-col overflow-hidden bg-[#080808]">
 

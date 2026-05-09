@@ -17,14 +17,14 @@ export default function Navbar() {
     <>
       {/* ── Main bar ── */}
       <header className="fixed top-0 inset-x-0 z-50 border-b-2 border-[#0D0D0D] bg-[#0D0D0D]">
-        <div className="max-w-6xl mx-auto px-5 md:px-10 h-28 flex items-center justify-between gap-6">
+        <div className="max-w-6xl mx-auto px-5 md:px-10 h-20 flex items-center justify-between gap-6">
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0 group">
             <img
               src="/assets/logo.png"
               alt="Ishan Bangla News"
-              className="h-[104px] w-auto object-contain transition-opacity duration-150 group-hover:opacity-90"
+              className="h-[68px] w-auto object-contain transition-opacity duration-150 group-hover:opacity-90"
             />
             <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#D91C1C] border border-[#D91C1C] px-1.5 py-0.5 hidden md:block">
               LIVE
@@ -96,7 +96,7 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-28 inset-x-0 z-40 bg-[#0D0D0D] border-b-2 border-[#D91C1C] md:hidden"
+            className="fixed top-20 inset-x-0 z-40 bg-[#0D0D0D] border-b-2 border-[#D91C1C] md:hidden"
           >
             <nav className="flex flex-col py-4 px-5">
               {LINKS.map(({ to, label }) => (

@@ -15,7 +15,7 @@ export default function About() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="pt-28"
+      className="pt-20"
     >
 
       {/* ── HERO ── */}

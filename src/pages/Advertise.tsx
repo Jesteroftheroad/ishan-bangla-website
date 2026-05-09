@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { S } from '../lib/styles'
 

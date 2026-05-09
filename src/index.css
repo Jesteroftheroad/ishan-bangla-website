@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+/* ── Neobrutalist design system for Ishan Bangla ── */
+@theme {
+  /* Fonts */
+  --font-display:  "Bebas Neue", sans-serif;
+  --font-sans:     "IBM Plex Serif", serif;
+  --font-serif:    "IBM Plex Serif", serif;
+  --font-mono:     "IBM Plex Mono", monospace;
+  --font-bengali:  "Noto Sans Bengali", sans-serif;
+
+  /* Brand colours */
+  --color-parchment: #F5F2EB;
+  --color-ink:       #0D0D0D;
+  --color-signal:    #D91C1C;
+  --color-brand-blue: #1B3EC8;
+  --color-gold:      #C4870A;
+  --color-smoke:     #E8E5DE;
+}
+
+/* ── Brutalist shadow utilities ── */
+@utility shadow-brutal {
+  box-shadow: 5px 5px 0 #0D0D0D;
+}
+@utility shadow-brutal-sm {
+  box-shadow: 3px 3px 0 #0D0D0D;
+}
+@utility shadow-brutal-lg {
+  box-shadow: 8px 8px 0 #0D0D0D;
+}
+@utility shadow-brutal-red {
+  box-shadow: 5px 5px 0 #D91C1C;
+}
+@utility shadow-brutal-red-lg {
+  box-shadow: 8px 8px 0 #D91C1C;
+}
+
+/* ── Base ── */
+:root {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #F5F2EB;
+  overflow-x: hidden;
+}
+
+/* Scrollbar – thin and on-brand */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #F5F2EB; }
+::-webkit-scrollbar-thumb { background: #0D0D0D; }
+
+/* Ticker animation */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker-inner {
+  animation: ticker-scroll 28s linear infinite;
+}
+.ticker-inner:hover { animation-play-state: paused; }
+
+/* Floating hero card animations */
+@keyframes float-a {
+  0%, 100% { transform: translateY(0px)   rotate(-8deg); }
+  50%       { transform: translateY(-14px) rotate(-8deg); }
+}
+@keyframes float-b {
+  0%, 100% { transform: translateY(-6px) rotate(6deg); }
+  50%       { transform: translateY(8px)  rotate(6deg); }
+}
+@keyframes float-c {
+  0%, 100% { transform: translateY(0px)   rotate(-4deg); }
+  50%       { transform: translateY(-10px) rotate(-4deg); }
+}
+@keyframes float-d {
+  0%, 100% { transform: translateY(-8px) rotate(5deg); }
+  50%       { transform: translateY(6px)  rotate(5deg); }
+}
+.float-a { animation: float-a 4s   ease-in-out infinite; }
+.float-b { animation: float-b 5s   ease-in-out infinite 1s; }
+.float-c { animation: float-c 4.5s ease-in-out infinite 0.5s; }
+.float-d { animation: float-d 6s   ease-in-out infinite 1.5s; }
+
+/* WhatsApp pulse ring */
+@keyframes wa-ping {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+.wa-ping { animation: wa-ping 2s ease-out infinite; }

@@ -1,66 +1,100 @@
+/* =========================================================
+   Ishan Bangla — Global stylesheet
+   Tailwind CSS v4 (CSS-first) entry point
+   ========================================================= */
+
+/* Google Fonts — must precede the Tailwind import */
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+Bengali:wght@400;500;600;700;800&display=swap");
+
 @import "tailwindcss";
 
-/* ── Neobrutalist design system for Ishan Bangla ── */
+/* ---- Design tokens ---- */
 @theme {
-  /* Fonts */
-  --font-display:  "Bebas Neue", sans-serif;
-  --font-sans:     "IBM Plex Serif", serif;
-  --font-serif:    "IBM Plex Serif", serif;
-  --font-mono:     "IBM Plex Mono", monospace;
-  --font-bengali:  "Noto Sans Bengali", sans-serif;
-
   /* Brand colours */
-  --color-parchment: #F5F2EB;
-  --color-ink:       #0D0D0D;
-  --color-signal:    #D91C1C;
-  --color-brand-blue: #1B3EC8;
-  --color-gold:      #C4870A;
-  --color-smoke:     #E8E5DE;
+  --color-parchment: #f5f2eb;
+  --color-ink:       #0d0d0d;
+  --color-signal:    #d91c1c;   /* primary CTA / accents      */
+  --color-brand:     #1b3ec8;   /* only "ঈশান" in the hero    */
+  --color-wa:        #25d366;   /* WhatsApp affordances only  */
+  --color-surface:   #141414;   /* dark cinematic card fill   */
+  --color-gold:      #c4870a;
+  --color-smoke:     #e8e5de;
+
+  /* Fonts — both aliases kept so all pages work */
+  --font-bebas:      "Bebas Neue", sans-serif;
+  --font-display:    "Bebas Neue", sans-serif;   /* legacy alias */
+  --font-sans:       "IBM Plex Serif", serif;
+  --font-serif:      "IBM Plex Serif", serif;
+  --font-mono:       "IBM Plex Mono", monospace;
+  --font-bengali:    "Noto Sans Bengali", sans-serif;
 }
 
-/* ── Brutalist shadow utilities ── */
+/* ---- Base ---- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-parchment);
+    color: var(--color-ink);
+    font-family: var(--font-serif);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}
+
+/* ---- Brutalist shadow utilities (used by S.card, S.btn* etc.) ---- */
 @utility shadow-brutal {
-  box-shadow: 5px 5px 0 #0D0D0D;
+  box-shadow: 5px 5px 0 #0d0d0d;
 }
 @utility shadow-brutal-sm {
-  box-shadow: 3px 3px 0 #0D0D0D;
+  box-shadow: 3px 3px 0 #0d0d0d;
 }
 @utility shadow-brutal-lg {
-  box-shadow: 8px 8px 0 #0D0D0D;
+  box-shadow: 8px 8px 0 #0d0d0d;
 }
 @utility shadow-brutal-red {
-  box-shadow: 5px 5px 0 #D91C1C;
+  box-shadow: 5px 5px 0 #d91c1c;
 }
 @utility shadow-brutal-red-lg {
-  box-shadow: 8px 8px 0 #D91C1C;
+  box-shadow: 8px 8px 0 #d91c1c;
 }
 
-/* ── Base ── */
-:root {
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ---- Animated film grain (CSS-only diagonal drift) ---- */
+@layer components {
+  .grain {
+    position: fixed;
+    inset: -50px;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0.05;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 220px 220px;
+    animation: grainDrift 14s linear infinite;
+    will-change: background-position;
+  }
+  @keyframes grainDrift {
+    from { background-position: 0 0; }
+    to   { background-position: 220px 220px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .grain { animation: none; }
+  }
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: #f5f2eb; }
+::-webkit-scrollbar-thumb { background: #0d0d0d; }
 
-body {
-  margin: 0;
-  padding: 0;
-  background: #F5F2EB;
-  overflow-x: hidden;
-}
-
-/* Scrollbar – thin and on-brand */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #F5F2EB; }
-::-webkit-scrollbar-thumb { background: #0D0D0D; }
-
-/* Ticker animation */
+/* ---- Breaking ticker ---- */
 @keyframes ticker-scroll {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
@@ -70,7 +104,7 @@ body {
 }
 .ticker-inner:hover { animation-play-state: paused; }
 
-/* Floating hero card animations */
+/* ---- Floating hero card animations (Home page) ---- */
 @keyframes float-a {
   0%, 100% { transform: translateY(0px)   rotate(-8deg); }
   50%       { transform: translateY(-14px) rotate(-8deg); }
@@ -92,7 +126,7 @@ body {
 .float-c { animation: float-c 4.5s ease-in-out infinite 0.5s; }
 .float-d { animation: float-d 6s   ease-in-out infinite 1.5s; }
 
-/* WhatsApp pulse ring */
+/* ---- WhatsApp floating FAB pulse ---- */
 @keyframes wa-ping {
   0%   { transform: scale(1);   opacity: 0.6; }
   100% { transform: scale(1.8); opacity: 0; }

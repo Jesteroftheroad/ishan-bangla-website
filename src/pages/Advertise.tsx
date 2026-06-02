@@ -1,69 +1,646 @@
-import { motion } from 'motion/react'
-import { S } from '../lib/styles'
+/* =========================================================================
+   Ishan Bangla — Advertise page
+   React 19 + TypeScript · Tailwind CSS v4 (CSS-first) · motion/react v11
 
-const WA_PLAN = (plan: string, price: string) =>
-  `https://wa.me/919395616617?text=Hi%2C%20I%27m%20interested%20in%20the%20${encodeURIComponent(plan)}%20advertising%20plan%20(${encodeURIComponent(price)})%20on%20Ishan%20Bangla.`
+   Design system:
+     • Neobrutalism is the default — parchment grounds, 2px ink borders,
+       hard offset shadows (5px 5px 0 #0D0D0D), sharp corners, Bebas at scale.
+     • Dark cinematic is a scoped exception — used in Ad Formats and Why/CTA
+       sections (#141414 surfaces, soft borders, subtle glow), but keeps
+       brutalist structure (sharp corners, red accents).
+   ========================================================================= */
 
-const FORMATS = [
-  { ico: '🎬', name: 'Banner Ads',        namebn: 'ভিডিওতে ব্যানার',   desc: 'Your brand inside our news videos. Seen by every viewer, on every replay.',  badge: 'Most Viewed'    },
-  { ico: '🖼️', name: 'Poster Ads',        namebn: 'সোশ্যাল মিডিয়া',  desc: 'Branded graphic posts shared across all our social platforms.',              badge: 'High Reach'     },
-  { ico: '📹', name: 'Video Ads',          namebn: 'প্রি-রোল ভিডিও',   desc: '15–30 sec unskippable pre-roll before our popular bulletins.',               badge: 'Premium Slot'   },
-  { ico: '⭐', name: 'Business Feature',  namebn: 'এক্সক্লুসিভ কভারেজ', desc: 'Full editorial-style story dedicated to your business.',                   badge: 'Best ROI'       },
-]
+import { useEffect, useRef, useState } from "react";
+import {
+  motion,
+  animate,
+  useInView,
+  type Variants,
+} from "motion/react";
 
-const PLATFORMS = [
-  { platform: 'Facebook',    stat: '35M+', unit: 'monthly views',  color: '#1877F2' },
-  { platform: 'YouTube',     stat: '6M+',  unit: 'monthly views',  color: '#FF0000' },
-  { platform: 'Instagram',   stat: '1M+',  unit: 'monthly reach',  color: '#E1306C' },
-  { platform: 'Cable TV',    stat: '1000+',unit: 'households',     color: '#C4870A' },
-]
+/* ------------------------------------------------------------------ */
+/* Shared motion variants                                               */
+/* ------------------------------------------------------------------ */
 
-const PLANS = [
+const EASE: [number, number, number, number] = [0.2, 0.8, 0.2, 1];
+
+const stagger = (gap = 0.08): Variants => ({
+  hidden: {},
+  show: { transition: { staggerChildren: gap } },
+});
+
+const cardUp: Variants = {
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } },
+};
+
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+};
+
+const fromLeft: Variants = {
+  hidden: { opacity: 0, x: -44 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.6, ease: EASE } },
+};
+
+const fromRight: Variants = {
+  hidden: { opacity: 0, x: 40 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.6, ease: EASE, delay: 0.2 } },
+};
+
+const word: Variants = {
+  hidden: { y: "0.5em", opacity: 0 },
+  show: {
+    y: 0,
+    opacity: 1,
+    transition: { duration: 0.7, ease: [0.18, 0.85, 0.25, 1] as [number, number, number, number] },
+  },
+};
+
+const inViewOnce = { once: true, amount: 0.3 } as const;
+
+const BRUTAL = "shadow-[5px_5px_0_#0d0d0d]";
+const SECTION_X = "px-5 md:px-10 lg:px-16";
+const SECTION_Y = "py-16 md:py-24";
+
+/* ------------------------------------------------------------------ */
+/* Content data                                                         */
+/* ------------------------------------------------------------------ */
+
+interface StatCard {
+  plat: string;
+  to: number;
+  suffix: string;
+  label: string;
+  secLabel: string;
+  secVal: string;
+  accent: string;
+}
+
+const STATS: StatCard[] = [
+  { plat: "YouTube",   to: 15,  suffix: "M", label: "Monthly views", secLabel: "Subscribers",  secVal: "265K",        accent: "#FF0000" },
+  { plat: "Facebook",  to: 40,  suffix: "M", label: "Monthly views", secLabel: "Followers",    secVal: "115K",        accent: "#1877F2" },
+  { plat: "Instagram", to: 10,  suffix: "M", label: "Monthly views", secLabel: "Format",       secVal: "Reels & Feed",accent: "#E1306C" },
+  { plat: "Cable TV",  to: 800, suffix: "+", label: "Households",    secLabel: "Coverage",     secVal: "Barak Valley",accent: "#0D0D0D" },
+];
+
+interface Format {
+  num: string;
+  tag: string;
+  name: string;
+  plats: { n: string; c: string }[];
+  desc: string;
+}
+
+const FORMATS: Format[] = [
   {
-    name: 'Starter',
-    price: '₹600',
-    note: 'For small local businesses',
-    features: [
-      'Poster ads across social media',
-      'Facebook + Instagram reach',
-      'Perfect for first-time advertisers',
-      '★ FREE Cable TV promotion',
-    ],
-    cta: 'Get Started',
-    featured: false,
+    num: "01",
+    tag: "Most Popular",
+    name: "Social Media Post",
+    plats: [{ n: "Facebook", c: "#1877F2" }, { n: "Instagram", c: "#E1306C" }],
+    desc: "A branded graphic or reel posted on our channels — reaching your exact local audience.",
   },
   {
-    name: 'Growth',
-    price: '₹5,000',
-    note: '15–30 day campaigns',
-    features: [
-      'Banner + Video Ads combo',
-      'All platforms covered',
-      '15–30 day campaign duration',
-      'Pre-roll video ad slots',
-      '★ FREE Cable TV promotion',
-      'Detailed reach report',
-    ],
-    cta: 'Book This Plan',
-    featured: true,
+    num: "02",
+    tag: "High Trust",
+    name: "Video Mention",
+    plats: [{ n: "YouTube", c: "#FF0000" }, { n: "Cable TV", c: "#F5F2EB" }],
+    desc: "Your brand mentioned by our anchor during a news segment. High trust — it feels like an editorial endorsement.",
   },
   {
-    name: 'Premium',
-    price: '₹24,000',
-    note: 'Full platform domination',
-    features: [
-      'Dedicated Business Feature story',
-      'Full exposure across all platforms',
-      'Editorial-style video coverage',
-      'Facebook + YouTube + Instagram',
-      '★ FREE Cable TV promotion',
-      'Priority placement & scheduling',
-      'Monthly performance report',
-    ],
-    cta: 'Go Premium',
-    featured: false,
+    num: "03",
+    tag: "Best For Brand Building",
+    name: "Sponsored Story",
+    plats: [{ n: "Facebook", c: "#1877F2" }, { n: "YouTube", c: "#FF0000" }],
+    desc: "A dedicated 2–5 minute feature about your business. A storytelling format that works for restaurants, clinics and schools.",
   },
-]
+  {
+    num: "04",
+    tag: "Trending",
+    name: "Business Feature Reel",
+    plats: [{ n: "Instagram", c: "#E1306C" }, { n: "YouTube Shorts", c: "#FF0000" }],
+    desc: "A 30–60 second branded video reel. Fast-cut, modern format made for younger audiences.",
+  },
+];
+
+interface PriceFormat {
+  num: string;
+  name: string;
+  note?: string;
+  desc: string;
+  rows: [string, string][];
+}
+
+const PRICING: PriceFormat[] = [
+  {
+    num: "Format 01",
+    name: "Poster Banner Ads",
+    desc: "A static banner placed across our posts and posters.",
+    rows: [["3 Days", "₹600"], ["7 Days", "₹800"], ["15 Days", "₹2,000"], ["30 Days", "₹4,000"], ["60 Days", "₹8,000"]],
+  },
+  {
+    num: "Format 02",
+    name: "Banner Ads in Videos",
+    desc: "Your banner displayed inside our news videos.",
+    rows: [["3 Days", "₹1,000"], ["7 Days", "₹1,200"], ["15 Days", "₹2,500"], ["30 Days", "₹5,000"], ["60 Days", "₹10,000"]],
+  },
+  {
+    num: "Format 03",
+    name: "Video Ads",
+    note: "(Intro / Outro)",
+    desc: "A video spot at the start or end of our news segments.",
+    rows: [["3 Days", "₹1,500"], ["7 Days", "₹3,000"], ["15 Days", "₹6,000"], ["30 Days", "₹12,000"], ["60 Days", "₹24,000"]],
+  },
+  {
+    num: "Format 04",
+    name: "Dedicated Business Feature",
+    desc: "A full feature story dedicated entirely to your business.",
+    rows: [["3 Days", "₹2,000"], ["7 Days", "₹4,000"], ["15 Days", "₹8,000"], ["30 Days", "₹16,000"], ["60 Days", "₹32,000"]],
+  },
+];
+
+const WHY: { h: string; p: string }[] = [
+  { h: "Deep Trust",              p: "Viewers rely on our news every day — your brand inherits that hard-earned credibility." },
+  { h: "High Engagement",         p: "Millions of interactions, shares and comments every week across our platforms." },
+  { h: "Natural Brand Placement", p: "Your business appears inside the content people already choose to watch." },
+  { h: "Not Just Online — We Reach Homes", p: "From the phone in their hand to the TV in their living room across Silchar." },
+];
+
+/* ------------------------------------------------------------------ */
+/* Hooks & small components                                             */
+/* ------------------------------------------------------------------ */
+
+function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.4 });
+  const [val, setVal] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    const controls = animate(0, to, {
+      duration: 1.5,
+      ease: "easeOut",
+      onUpdate: (v) => setVal(Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [inView, to]);
+
+  return (
+    <span ref={ref}>
+      {val.toLocaleString("en-US")}
+      {suffix}
+    </span>
+  );
+}
+
+function useIdlePulse(delay: number): boolean {
+  const [pulse, setPulse] = useState(false);
+  useEffect(() => {
+    let timer = window.setTimeout(() => setPulse(true), delay);
+    const cancel = () => {
+      window.clearTimeout(timer);
+      setPulse(false);
+      window.removeEventListener("scroll", cancel);
+      window.removeEventListener("pointermove", cancel);
+    };
+    window.addEventListener("scroll", cancel, { passive: true });
+    window.addEventListener("pointermove", cancel, { passive: true });
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("scroll", cancel);
+      window.removeEventListener("pointermove", cancel);
+    };
+  }, [delay]);
+  return pulse;
+}
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="mb-5 inline-flex items-center gap-3 font-mono text-[13px] font-semibold uppercase tracking-[0.25em] text-signal">
+      <span className="h-0.5 w-10 bg-signal" />
+      {children}
+    </span>
+  );
+}
+
+function WaGlyph() {
+  return (
+    <span className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-ink">
+      <span className="h-[7px] w-[7px] rounded-full bg-ink" />
+    </span>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Hero                                                                 */
+/* ------------------------------------------------------------------ */
+
+function Hero() {
+  const ctaPulse = useIdlePulse(3000);
+
+  return (
+    <section className="relative z-[3] mx-auto max-w-6xl px-5 pb-12 pt-4 md:px-10 md:pb-20 md:pt-8 lg:px-16">
+      <div className={`grid grid-cols-1 items-stretch border-2 border-ink bg-parchment md:grid-cols-[60%_40%] ${BRUTAL}`}>
+        {/* LEFT */}
+        <motion.div
+          className="flex flex-col justify-center p-7 md:p-10 lg:p-12"
+          initial="hidden"
+          animate="show"
+          variants={stagger(0.12)}
+        >
+          <motion.div variants={fadeUp}>
+            <Eyebrow>Advertise with Ishan Bangla</Eyebrow>
+          </motion.div>
+
+          <h1 className="mb-6 font-bebas text-[clamp(46px,6vw,88px)] leading-[0.88] tracking-wide">
+            <motion.span className="block" variants={stagger(0.1)}>
+              {["YOUR", "AD."].map((w) => (
+                <span key={w} className="mr-[0.25em] inline-block overflow-hidden align-bottom">
+                  <motion.span className="inline-block" variants={word}>{w}</motion.span>
+                </span>
+              ))}
+            </motion.span>
+            <motion.span className="block text-signal" variants={stagger(0.1)}>
+              {["65", "MILLION", "EYES."].map((w) => (
+                <span key={w} className="mr-[0.25em] inline-block overflow-hidden align-bottom">
+                  <motion.span className="inline-block" variants={word}>{w}</motion.span>
+                </span>
+              ))}
+            </motion.span>
+          </h1>
+
+          <motion.p variants={fadeUp} className="mb-8 max-w-[46ch] font-serif text-[clamp(17px,1.5vw,21px)] leading-[1.5] text-[#33302a]">
+            The Barak Valley's most-watched Bengali news channel — across YouTube, Facebook, Instagram and Cable TV.
+          </motion.p>
+
+          <motion.div variants={fadeUp} className="mb-[18px] flex flex-wrap items-center gap-4">
+            <a
+              href="#rates"
+              className={`inline-flex items-center gap-3 whitespace-nowrap border-2 border-ink bg-signal px-[30px] pb-[14px] pt-[18px] font-bebas text-[24px] leading-none tracking-wide text-white ${BRUTAL} transition-[transform,box-shadow] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[2px_2px_0_#0d0d0d]`}
+            >
+              GET AD RATES
+            </a>
+            <motion.a
+              href="https://wa.me/919395616617?text=Hi%2C%20I%20want%20to%20advertise%20on%20Ishan%20Bangla."
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp Us"
+              animate={ctaPulse ? { x: [0, -2, 0], y: [0, -2, 0] } : { x: 0, y: 0 }}
+              transition={ctaPulse ? { duration: 1.1, repeat: 1, ease: "easeInOut" } : { duration: 0.2 }}
+              className={`inline-flex items-center gap-3 whitespace-nowrap border-2 border-ink bg-wa px-[30px] pb-[14px] pt-[18px] font-bebas text-[24px] leading-none tracking-wide text-ink ${BRUTAL} transition-[transform,box-shadow] hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-[2px_2px_0_#0d0d0d]`}
+            >
+              <WaGlyph />
+              WHATSAPP US
+            </motion.a>
+          </motion.div>
+
+          <motion.p variants={fadeUp} className="inline-flex items-center gap-2.5 font-mono text-xs font-medium uppercase tracking-[0.2em] text-[#6b6660]">
+            <span className="inline-block h-[7px] w-[7px] border-[1.5px] border-ink bg-wa" />
+            Trusted by local businesses across Barak Valley
+          </motion.p>
+        </motion.div>
+
+        {/* RIGHT — dark broadcast panel */}
+        <div className="relative flex min-h-[360px] items-center justify-center overflow-hidden border-t-2 border-ink bg-ink p-7 md:border-l-2 md:border-t-0 md:p-10">
+          <motion.div
+            className="flex w-full max-w-[300px] flex-col border-2 border-parchment bg-surface shadow-[8px_8px_0_#d91c1c]"
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, ease: EASE, delay: 0.3 }}
+          >
+            <div className="flex items-center justify-between border-b-2 border-[#2b2b2b] px-3.5 py-[11px]">
+              <span className="inline-flex items-center gap-2 font-mono text-xs font-semibold tracking-[0.16em] text-white">
+                <motion.span
+                  className="inline-block h-[9px] w-[9px] bg-signal"
+                  animate={{ opacity: [1, 1, 0.2, 0.2] }}
+                  transition={{ duration: 1.1, repeat: Infinity, ease: "linear", times: [0, 0.499, 0.5, 1] }}
+                />
+                LIVE
+              </span>
+              <span className="text-right font-bengali text-sm font-bold leading-tight text-parchment">ঈশান বাংলা</span>
+            </div>
+            <div className="flex flex-col items-center gap-1.5 px-4 py-9 text-center md:py-11">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8d8d8d]">Total monthly reach</span>
+              <span className="font-bebas text-[clamp(78px,9vw,120px)] leading-[0.8] text-white">65M+</span>
+              <span className="font-serif text-sm italic text-[#c9c4bb]">eyes on your ad</span>
+            </div>
+            <div className="border-t-2 border-parchment bg-signal px-3.5 py-[9px] text-center font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
+              Live from Silchar · Barak Valley
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* red break rule */}
+      <hr className="mt-8 h-[3px] border-0 bg-signal md:mt-12" />
+
+      {/* platform stat cards */}
+      <motion.div
+        className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 md:mt-12 md:grid-cols-4"
+        initial="hidden"
+        whileInView="show"
+        viewport={inViewOnce}
+        variants={stagger(0.08)}
+      >
+        {STATS.map((s) => (
+          <motion.article
+            key={s.plat}
+            variants={cardUp}
+            className={`group relative flex flex-col border-2 border-ink bg-[#FCFBF7] px-6 pb-6 pt-7 ${BRUTAL} transition-[transform,box-shadow] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_#0d0d0d]`}
+          >
+            <span className="absolute inset-x-0 top-0 h-[3px]" style={{ background: s.accent }} />
+            <span className="mb-2.5 font-mono text-xs font-semibold uppercase tracking-[0.2em] text-ink">{s.plat}</span>
+            <span className="font-bebas text-[clamp(72px,6.6vw,94px)] leading-[0.84] tabular-nums text-signal">
+              <CountUp to={s.to} suffix={s.suffix} />
+            </span>
+            <span className="mt-0.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8a847a]">{s.label}</span>
+            <div className="mt-[18px] flex flex-col gap-[3px] border-t-2 border-ink pt-3.5">
+              <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.2em] text-[#8a847a]">{s.secLabel}</span>
+              <span className="font-bebas text-[32px] leading-none tracking-wide text-ink">{s.secVal}</span>
+            </div>
+          </motion.article>
+        ))}
+      </motion.div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Ad Formats — dark cinematic section                                  */
+/* ------------------------------------------------------------------ */
+
+function AdFormats() {
+  return (
+    <section className={`relative z-[3] overflow-hidden border-t-2 border-ink bg-ink text-white ${SECTION_X} ${SECTION_Y}`}>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-0 top-1/2 z-[1] select-none font-bebas text-[clamp(120px,15vw,230px)] leading-[0.8] tracking-[6px] text-white/5 [writing-mode:vertical-rl] [transform:translateY(-50%)_rotate(180deg)]"
+      >
+        AD FORMATS
+      </span>
+
+      <div className="relative z-[2] mx-auto max-w-6xl">
+        <motion.header
+          className="mb-10 max-w-[760px] md:mb-16"
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={fromLeft}
+        >
+          <Eyebrow>What We Offer</Eyebrow>
+          <h2 className="m-0 mb-[18px] font-bebas text-[clamp(46px,6.4vw,72px)] leading-none tracking-wide text-white">
+            <span className="block whitespace-nowrap">Four Ways To</span>
+            <span className="block whitespace-nowrap">Reach The Valley</span>
+          </h2>
+          <p className="m-0 max-w-[50ch] font-serif text-[17px] leading-[1.55] text-white/70">
+            Choose the format that fits your goal. Mix and match across packages.
+          </p>
+        </motion.header>
+
+        <motion.div
+          className="grid grid-cols-1 gap-6 md:grid-cols-2"
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={stagger(0.08)}
+        >
+          {FORMATS.map((f) => (
+            <motion.article
+              key={f.num}
+              variants={cardUp}
+              whileHover={{ y: -4 }}
+              className="group relative flex flex-col border border-white/15 bg-surface px-8 pb-8 pt-[30px] transition-[border-color,box-shadow] hover:border-white/40 hover:shadow-[0_14px_44px_rgba(0,0,0,0.5),0_0_30px_rgba(217,28,28,0.08)]"
+            >
+              <div className="mb-2 flex items-start justify-between gap-4">
+                <span className="font-bebas text-[80px] leading-[0.78] text-signal">{f.num}</span>
+                <span className="mt-1.5 shrink-0 whitespace-nowrap bg-signal px-3 py-[7px] font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-white">
+                  {f.tag}
+                </span>
+              </div>
+              <h3 className="mb-4 font-bebas text-[32px] leading-none tracking-wide text-white">{f.name}</h3>
+              <div className="mb-4 flex flex-wrap gap-[18px]">
+                {f.plats.map((p) => (
+                  <span key={p.n} className="inline-flex items-center gap-2 font-mono text-[11.5px] font-semibold uppercase tracking-[0.12em] text-white/85">
+                    <span className="inline-block h-[9px] w-[9px]" style={{ background: p.c }} />
+                    {p.n}
+                  </span>
+                ))}
+              </div>
+              <p className="m-0 max-w-[42ch] font-serif text-sm leading-[1.55] text-white/70">{f.desc}</p>
+            </motion.article>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Pricing                                                              */
+/* ------------------------------------------------------------------ */
+
+function Pricing() {
+  return (
+    <section id="rates" className={`relative z-[3] border-t-2 border-ink bg-parchment ${SECTION_X} ${SECTION_Y}`}>
+      <div className="mx-auto max-w-6xl">
+        <motion.header
+          className="mb-10 flex flex-col items-start md:mb-14"
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={fadeUp}
+        >
+          <Eyebrow>Advertising Packages</Eyebrow>
+          <h2 className="m-0 mb-[18px] font-bebas text-[clamp(34px,4.6vw,64px)] leading-[1.04] tracking-wide text-ink">
+            <span className="block whitespace-normal md:whitespace-nowrap">Your Format. Your Duration. Your Budget.</span>
+          </h2>
+          <p className="m-0 max-w-[46ch] font-serif text-[17px] leading-[1.55] text-[#43403a]">
+            No hidden fees. Start any day. Cancel anytime.
+          </p>
+        </motion.header>
+
+        <motion.div
+          className="grid grid-cols-1 gap-6 md:grid-cols-2"
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={stagger(0.09)}
+        >
+          {PRICING.map((p) => (
+            <motion.article
+              key={p.num}
+              variants={cardUp}
+              className={`group relative flex flex-col border-2 border-ink bg-white px-[38px] pb-9 pt-[38px] ${BRUTAL} transition-[transform,box-shadow] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_#0d0d0d]`}
+            >
+              <span className="mb-2.5 inline-flex items-center gap-[9px] font-mono text-xs font-semibold uppercase tracking-[0.2em] text-signal">
+                <span className="h-0.5 w-4 bg-signal" />
+                {p.num}
+              </span>
+              <h3 className="mb-[7px] font-bebas text-[32px] leading-none tracking-wide text-ink">
+                {p.name}
+                {p.note && <span className="ml-1.5 text-[0.6em] text-[#8a847a]">{p.note}</span>}
+              </h3>
+              <p className="m-0 font-serif text-[15px] leading-[1.45] text-[#56524b]">{p.desc}</p>
+
+              <div className="my-6">
+                {p.rows.map(([dur, price], i) => (
+                  <div
+                    key={dur}
+                    className={`flex items-baseline justify-between gap-4 py-[15px] ${
+                      i < p.rows.length - 1 ? "border-b border-ink/20" : ""
+                    }`}
+                  >
+                    <span className="font-mono text-[13px] font-medium uppercase tracking-[0.1em] text-[#33302a]">{dur}</span>
+                    <span className="font-bebas text-[30px] leading-[0.9] tracking-wide text-signal">{price}</span>
+                  </div>
+                ))}
+              </div>
+
+              <a
+                href="https://wa.me/919395616617?text=Hi%2C%20I%20want%20to%20advertise%20on%20Ishan%20Bangla.%20Please%20share%20the%20packages."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-auto block w-full border-2 border-ink bg-ink px-[22px] pb-3 pt-4 text-center font-bebas text-[23px] leading-none tracking-wide text-white shadow-[4px_4px_0_#0d0d0d] transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-[4px_7px_0_#0d0d0d]"
+              >
+                GET STARTED
+              </a>
+            </motion.article>
+          ))}
+        </motion.div>
+
+        {/* bonus banner */}
+        <motion.div
+          className="mt-7 flex flex-wrap items-center justify-center gap-[18px] border-2 border-t-[3px] border-ink border-t-signal bg-ink px-6 py-7 text-center shadow-[5px_5px_0_#d91c1c] md:mt-9 md:px-10"
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={fadeUp}
+        >
+          <span className="shrink-0 bg-signal px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-white">Bonus</span>
+          <span className="font-bebas text-[clamp(24px,2.5vw,34px)] leading-[1.05] tracking-wide text-white">
+            Every plan includes <em className="not-italic text-signal [white-space:nowrap]">Free Cable TV Promotion</em> in Silchar
+          </span>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Why Ishan Bangla                                                     */
+/* ------------------------------------------------------------------ */
+
+function Why() {
+  return (
+    <section className={`relative z-[3] overflow-hidden border-t-2 border-ink bg-ink text-white ${SECTION_X} ${SECTION_Y}`}>
+      <div className="mx-auto max-w-6xl">
+        <motion.header
+          className="mb-12 max-w-[980px] md:mb-[72px]"
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={fromLeft}
+        >
+          <Eyebrow>Why Ishan Bangla</Eyebrow>
+          <h2 className="m-0 font-bebas text-[clamp(46px,7vw,88px)] leading-[0.96] tracking-wide text-white">
+            We Don't Run Ads.<br />We Run <span className="text-signal">Attention.</span>
+          </h2>
+        </motion.header>
+
+        <motion.div
+          className="grid grid-cols-1 gap-9 sm:grid-cols-2 md:grid-cols-4 md:gap-[30px]"
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={stagger(0.1)}
+        >
+          {WHY.map((w) => (
+            <motion.div key={w.h} variants={cardUp} className="border-t-[3px] border-signal pt-[22px]">
+              <h3 className="mb-3.5 min-h-[2.1em] font-bebas text-[27px] leading-[1.04] tracking-wide text-white">{w.h}</h3>
+              <p className="m-0 font-serif text-[15px] leading-[1.6] text-white/70">{w.p}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Final CTA                                                            */
+/* ------------------------------------------------------------------ */
+
+function FinalCta() {
+  const waPulse = useIdlePulse(2000);
+
+  return (
+    <section className={`relative z-[3] border-t-[3px] border-signal bg-ink text-white ${SECTION_X} ${SECTION_Y}`}>
+      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-11 md:grid-cols-[1.5fr_1fr] md:gap-[clamp(36px,5vw,72px)]">
+        {/* LEFT */}
+        <motion.div initial="hidden" whileInView="show" viewport={inViewOnce} variants={fromLeft}>
+          <Eyebrow>Let's Talk</Eyebrow>
+          <h2 className="m-0 mb-[22px] max-w-[16ch] font-bebas text-[clamp(46px,6.4vw,72px)] leading-[0.98] tracking-wide text-white">
+            Ready To Reach <span className="text-signal">65 Million</span> People?
+          </h2>
+          <p className="m-0 mb-[34px] max-w-[48ch] font-serif text-[16px] leading-[1.6] text-white/70">
+            Message us today. We'll find the right format and duration for your budget. Most campaigns go live within 24 hours.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <motion.a
+              href="https://wa.me/919395616617?text=Hi%2C%20I%20want%20to%20advertise%20on%20Ishan%20Bangla."
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp Us Now"
+              animate={waPulse ? { x: [0, -2, 0], y: [0, -2, 0] } : { x: 0, y: 0 }}
+              transition={waPulse ? { duration: 1.1, repeat: 1, ease: "easeInOut" } : { duration: 0.2 }}
+              className="inline-flex items-center gap-3 border-2 border-ink bg-wa px-[30px] pb-[14px] pt-[18px] font-bebas text-[24px] leading-none tracking-wide text-ink shadow-[5px_5px_0_#000] transition-[transform,box-shadow] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_#000]"
+            >
+              <WaGlyph />
+              WHATSAPP US NOW
+            </motion.a>
+            <a
+              href="mailto:ishanbanglanews@gmail.com"
+              className="inline-flex items-center gap-3 border-2 border-white/55 bg-transparent px-[30px] pb-[14px] pt-[18px] font-bebas text-[24px] leading-none tracking-wide text-white transition-colors hover:border-white hover:bg-white/[0.06]"
+            >
+              EMAIL US
+            </a>
+          </div>
+        </motion.div>
+
+        {/* RIGHT — contact card */}
+        <motion.div
+          className="flex flex-col border border-white/15 bg-white/5 p-7 md:p-9"
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={fromRight}
+        >
+          <div className="flex flex-col gap-1.5 border-b border-white/10 pb-[18px]">
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-white/50">Phone / WhatsApp</span>
+            <a href="https://wa.me/919395616617" className="font-serif text-[clamp(19px,1.8vw,23px)] leading-tight text-white transition-colors hover:text-wa">
+              +91 93956 16617
+            </a>
+          </div>
+          <div className="flex flex-col gap-1.5 border-b border-white/10 py-[18px]">
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.25em] text-white/50">Email</span>
+            <a href="mailto:ishanbanglanews@gmail.com" className="font-serif text-[clamp(19px,1.8vw,23px)] leading-tight text-white transition-colors hover:text-wa">
+              ishanbanglanews@gmail.com
+            </a>
+          </div>
+          <span className="mt-[22px] inline-flex items-center gap-[9px] font-mono text-[11.5px] font-semibold uppercase tracking-[0.2em] text-white/40">
+            <span className="inline-block h-[7px] w-[7px] bg-wa" />
+            Mon–Sat · 9AM–8PM · Silchar, Assam
+          </span>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Page export — fits into the existing router + fixed Navbar           */
+/* ------------------------------------------------------------------ */
 
 export default function Advertise() {
   return (
@@ -74,294 +651,13 @@ export default function Advertise() {
       transition={{ duration: 0.3 }}
       className="pt-[100px]"
     >
-
-      {/* ── HERO ── */}
-      <section className="bg-[#0D0D0D] border-b-2 border-[#D91C1C] px-5 md:px-10 lg:px-16 py-20 relative overflow-hidden">
-        {/* BG texture */}
-        <div className="absolute inset-0 opacity-5 bg-[repeating-linear-gradient(0deg,#D91C1C,#D91C1C_1px,transparent_1px,transparent_48px)]" />
-        <div className="max-w-6xl mx-auto relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 32 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <span className={`${S.tag} mb-6`}>Advertise With Us</span>
-            <h1 className={`${S.display} text-[70px] sm:text-[100px] md:text-[130px] lg:text-[160px] text-white leading-[0.88] mb-6`}>
-              35 Million<br />
-              <span className="text-[#D91C1C]">Monthly Views.</span><br />
-              Your Brand.
-            </h1>
-            <p className="font-sans text-white/60 text-base md:text-xl max-w-lg mb-8 leading-relaxed">
-              When you advertise on Ishan Bangla, your brand lives inside the content
-              that Silchar and Barak Valley trusts every single day.
-            </p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-wrap gap-4"
-          >
-            <a href="#pricing" className={S.btnRed}>See Pricing →</a>
-            <a
-              href="https://wa.me/919395616617?text=Hi%2C%20I%20want%20to%20advertise%20on%20Ishan%20Bangla.%20Please%20share%20the%20packages."
-              target="_blank" rel="noopener noreferrer"
-              className={S.btnWa}
-            >
-              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" aria-hidden="true">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-              </svg>
-              WhatsApp Now
-            </a>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── PLATFORM REACH ── */}
-      <section className={`${S.section} border-b-2 border-[#0D0D0D] bg-[#F5F2EB]`}>
-        <div className={S.inner}>
-          <div className="flex items-baseline gap-4 mb-10 border-b-2 border-[#0D0D0D] pb-4">
-            <h2 className={`${S.display} text-[52px] md:text-[70px]`}>Platform Reach</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {PLATFORMS.map(({ platform, stat, unit, color }, i) => (
-              <motion.div
-                key={platform}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: i * 0.08 }}
-                className={`${S.card} p-6`}
-                style={{ borderTopColor: color, borderTopWidth: 4 }}
-              >
-                <div className={`${S.display} text-[48px] md:text-[56px] leading-none mb-1`} style={{ color }}>
-                  {stat}
-                </div>
-                <div className="font-mono text-[11px] uppercase tracking-widest text-[#0D0D0D]/50">{unit}</div>
-                <div className="font-display text-xl text-[#0D0D0D] mt-1">{platform}</div>
-              </motion.div>
-            ))}
-          </div>
-          <div className="mt-8 border-2 border-[#D91C1C] bg-[#D91C1C] p-5 text-center">
-            <p className="font-display text-2xl md:text-3xl text-white tracking-wide uppercase">
-              📡 From mobile screens to living rooms — full visibility across every platform
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── AD FORMATS ── */}
-      <section className={`${S.section} border-b-2 border-[#0D0D0D] bg-[#F5F2EB]`}>
-        <div className={S.inner}>
-          <div className="flex items-baseline gap-4 mb-10 border-b-2 border-[#0D0D0D] pb-4">
-            <h2 className={`${S.display} text-[52px] md:text-[70px]`}>Ad Formats</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {FORMATS.map(({ ico, name, namebn, desc, badge }, i) => (
-              <motion.div
-                key={name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: i * 0.08 }}
-                className={`${S.card} p-6 flex flex-col`}
-              >
-                <div className="text-3xl mb-4" aria-hidden="true">{ico}</div>
-                <div className={`${S.display} text-2xl mb-1`}>{name}</div>
-                <div className="font-bengali text-sm text-[#D91C1C] mb-3">{namebn}</div>
-                <p className="font-sans text-sm text-[#0D0D0D]/60 leading-relaxed flex-1">{desc}</p>
-                <span className="mt-4 inline-block border border-[#C4870A] text-[#C4870A] font-mono text-[10px] uppercase tracking-widest px-2 py-0.5 w-fit">
-                  {badge}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── PRICING ── */}
-      <section id="pricing" className={`${S.section} border-b-2 border-[#0D0D0D] bg-[#F5F2EB]`}>
-        <div className={S.inner}>
-          <div className="text-center mb-12">
-            <span className={`${S.tag} mb-4`}>Packages</span>
-            <h2 className={`${S.display} text-[52px] md:text-[80px] mt-2`}>Simple, Honest Pricing</h2>
-            <p className="font-sans text-[#0D0D0D]/50 mt-2">No hidden fees. No complicated contracts. Start today.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-0 border-2 border-[#0D0D0D] [box-shadow:8px_8px_0_#0D0D0D]">
-            {PLANS.map(({ name, price, note, features, cta, featured }) => (
-              <div
-                key={name}
-                className={`p-7 border-[#0D0D0D] ${featured ? 'bg-[#0D0D0D] text-white border-x-2' : 'bg-white'} relative`}
-              >
-                {featured && <div className="absolute -top-px inset-x-0 h-1 bg-[#D91C1C]" />}
-                {featured && (
-                  <span className="font-mono text-[10px] uppercase tracking-widest text-[#D91C1C] border border-[#D91C1C] px-2 py-0.5 inline-block mb-4">
-                    ⭐ Most Popular
-                  </span>
-                )}
-                <div className="font-mono text-[11px] uppercase tracking-[0.2em] mb-2" style={{ color: featured ? 'rgba(255,255,255,0.4)' : 'rgba(13,13,13,0.4)' }}>
-                  {name}
-                </div>
-                <div className={`${S.display} text-[64px] leading-none mb-1 ${featured ? 'text-[#D91C1C]' : 'text-[#0D0D0D]'}`}>
-                  {price}
-                </div>
-                <div className="font-mono text-[11px] uppercase tracking-widest mb-6" style={{ color: featured ? 'rgba(255,255,255,0.4)' : 'rgba(13,13,13,0.4)' }}>
-                  {note}
-                </div>
-                <ul className="mb-6 flex flex-col gap-2">
-                  {features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm font-sans" style={{ color: f.startsWith('★') ? (featured ? '#D91C1C' : '#C4870A') : (featured ? 'rgba(255,255,255,0.75)' : 'rgba(13,13,13,0.7)') }}>
-                      <span className="shrink-0 mt-0.5">{f.startsWith('★') ? '★' : '✓'}</span>
-                      {f.replace('★ ', '')}
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href={WA_PLAN(name, price)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={featured ? S.btnRed + ' w-full justify-center' : S.btnOutline + ' w-full justify-center'}
-                >
-                  {cta} →
-                </a>
-              </div>
-            ))}
-          </div>
-
-          {/* Trust copy */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border-2 border-[#0D0D0D] bg-white p-5 shadow-brutal">
-              <p className="font-display text-xl text-[#0D0D0D] mb-1">Already helped local businesses grow</p>
-              <p className="font-sans text-sm text-[#0D0D0D]/55">Multiple Silchar businesses have seen direct customer growth through promotion on Ishan Bangla's platforms.</p>
-            </div>
-            <div className="border-2 border-[#0D0D0D] bg-white p-5 shadow-brutal">
-              <p className="font-display text-xl text-[#0D0D0D] mb-1">Your brand where people are watching</p>
-              <p className="font-sans text-sm text-[#0D0D0D]/55">35M+ monthly views mean your ad appears inside content Barak Valley already trusts — not beside it.</p>
-            </div>
-          </div>
-
-          <p className="text-center mt-5 font-mono text-[12px] text-[#0D0D0D]/40 uppercase tracking-widest">
-            All plans include <span className="text-[#C4870A]">FREE Cable TV promotion</span>
-            {' · '}Custom packages available — <span className="text-[#D91C1C]">WhatsApp to discuss</span>
-          </p>
-        </div>
-      </section>
-
-      {/* ── COLLAB ── */}
-      <section className={`${S.section} border-b-2 border-[#0D0D0D] bg-[#0D0D0D]`}>
-        <div className={S.inner}>
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-            <div className="flex-1">
-              <span className={`${S.tag} mb-5 !border-white/20 !text-white/50`}>Collaborations</span>
-              <h2 className={`${S.display} text-[48px] md:text-[70px] text-white leading-[0.9] mb-4`}>
-                Want to feature<br />
-                <span className="text-[#D91C1C]">in our videos?</span><br />
-                Let's collaborate.
-              </h2>
-              <p className="font-sans text-white/55 text-base md:text-lg max-w-md leading-relaxed">
-                Businesses, creators, NGOs, and public figures — if you have a story worth telling, Ishan Bangla's audience is waiting. We do editorial features, sponsored segments, and co-produced content.
-              </p>
-            </div>
-            <div className="shrink-0 flex flex-col gap-4">
-              <a
-                href="https://wa.me/919395616617?text=Hi%2C%20I%27d%20like%20to%20discuss%20a%20collaboration%20with%20Ishan%20Bangla."
-                target="_blank" rel="noopener noreferrer"
-                className={S.btnWa}
-              >
-                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" aria-hidden="true">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
-                WhatsApp to Collaborate
-              </a>
-              <div className="border-2 border-white/10 p-4 flex flex-col gap-2">
-                {['Editorial Feature', 'Sponsored Segment', 'Co-produced Content', 'Live Coverage'].map(t => (
-                  <div key={t} className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-white/40">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#D91C1C] shrink-0" />
-                    {t}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── CAREERS ── */}
-      <section className={`${S.section} border-b-2 border-[#0D0D0D] bg-[#F5F2EB]`}>
-        <div className={S.inner}>
-          <div className="flex flex-col md:flex-row items-start gap-10">
-            <div className="flex-1">
-              <span className={`${S.tag} mb-5`}>Careers</span>
-              <h2 className={`${S.display} text-[48px] md:text-[70px] leading-[0.9] mb-4`}>
-                Join the fastest<br />growing network<br />
-                <span className="text-[#D91C1C]">in Barak Valley.</span>
-              </h2>
-              <p className="font-sans text-[#0D0D0D]/55 text-base md:text-lg max-w-md leading-relaxed">
-                We're always on the lookout for passionate journalists, videographers, and digital storytellers who care about local news.
-              </p>
-            </div>
-            <div className="shrink-0 md:w-72">
-              <div className="border-2 border-[#0D0D0D] bg-white [box-shadow:6px_6px_0_#0D0D0D] p-7 text-center">
-                <div className="font-mono text-[11px] uppercase tracking-widest text-[#0D0D0D]/40 mb-3">Current Openings</div>
-                <div className={`${S.display} text-[56px] leading-none text-[#0D0D0D]/15 mb-3`}>0</div>
-                <p className="font-sans text-sm text-[#0D0D0D]/55 leading-relaxed mb-5">
-                  No openings at the moment.<br />Stay tuned — we grow fast.
-                </p>
-                <a
-                  href="https://wa.me/919395616617?text=Hi%2C%20I%27m%20interested%20in%20career%20opportunities%20at%20Ishan%20Bangla."
-                  target="_blank" rel="noopener noreferrer"
-                  className={`${S.btnOutline} w-full justify-center text-sm`}
-                >
-                  Get Notified →
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── FINAL CTA ── */}
-      <section className="bg-[#D91C1C] border-b-2 border-[#0D0D0D] px-5 md:px-10 lg:px-16 py-16">
-        <div className="max-w-6xl mx-auto text-center">
-          <motion.h2
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className={`${S.display} text-[60px] md:text-[90px] text-white mb-4`}
-          >
-            Let's Grow Your Business.
-          </motion.h2>
-          <p className="font-bengali text-white/75 text-lg mb-8">
-            আপনার ব্যবসাকে লক্ষ মানুষের কাছে পৌঁছে দিন
-          </p>
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
-            {['35M+ Viewers', 'From ₹600', '24-hr Setup', 'Free TV Promo'].map(pt => (
-              <span key={pt} className="font-mono text-[12px] text-white/60 uppercase tracking-widest border border-white/30 px-3 py-1.5">
-                {pt}
-              </span>
-            ))}
-          </div>
-          <div className="flex flex-wrap justify-center gap-4">
-            <a
-              href="https://wa.me/919395616617?text=Hi%2C%20I%20want%20to%20advertise%20on%20Ishan%20Bangla.%20Please%20share%20the%20packages."
-              target="_blank" rel="noopener noreferrer"
-              className={`${S.btnInk} !shadow-[4px_4px_0_#fff] hover:!shadow-[6px_6px_0_#fff]`}
-            >
-              <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" aria-hidden="true">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-              </svg>
-              WhatsApp Now
-            </a>
-            <a href="tel:+919395616617" className={`${S.btnOutline} !text-white !border-white [box-shadow:4px_4px_0_#fff]`}>
-              📞 Call Us
-            </a>
-            <a href="mailto:ishanbanglanews@gmail.com" className={`${S.btnOutline} !text-white !border-white [box-shadow:4px_4px_0_#fff]`}>
-              ✉️ Email
-            </a>
-          </div>
-        </div>
-      </section>
+      {/* subtle film grain overlay */}
+      <div className="grain" aria-hidden />
+      <Hero />
+      <AdFormats />
+      <Pricing />
+      <Why />
+      <FinalCta />
     </motion.main>
-  )
+  );
 }

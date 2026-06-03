@@ -1,151 +1,183 @@
-import { motion } from 'motion/react'
-import { Link } from 'react-router-dom'
-import { S } from '../lib/styles'
+/* =========================================================================
+   Ishan Bangla — About page  (Apple-minimal redesign)
+   React 19 + TypeScript · Tailwind CSS v4 · motion/react v11
+   ========================================================================= */
 
+import { useEffect, useRef, useState } from 'react'
+import { motion, animate, useInView, type Variants } from 'motion/react'
+import { Link } from 'react-router-dom'
+
+/* ── Motion ──────────────────────────────────────────────────────────────── */
+const EASE: [number, number, number, number] = [0.2, 0.8, 0.2, 1]
+const VP = { once: true, amount: 0.25 } as const
+
+const reveal: Variants = {
+  hidden: { opacity: 0, y: 28 },
+  show: (d = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.75, ease: EASE, delay: d } }),
+}
+function Reveal({ children, delay = 0, className }: { children: React.ReactNode; delay?: number; className?: string }) {
+  return (
+    <motion.div className={className} custom={delay} variants={reveal}
+      initial="hidden" whileInView="show" viewport={VP}>
+      {children}
+    </motion.div>
+  )
+}
+
+/* ── Count-up ────────────────────────────────────────────────────────────── */
+function CountUp({ to, suffix = '' }: { to: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const inView = useInView(ref, { once: true, amount: 0.5 })
+  const [val, setVal] = useState(0)
+  useEffect(() => {
+    if (!inView) return
+    const c = animate(0, to, { duration: 1.5, ease: 'easeOut', onUpdate: v => setVal(Math.round(v)) })
+    return () => c.stop()
+  }, [inView, to])
+  return <span ref={ref}>{val.toLocaleString('en-US')}{suffix}</span>
+}
+
+/* ── Data ────────────────────────────────────────────────────────────────── */
+const STATS = [
+  { to: 35,  suffix: 'M+', label: 'Total Views', sub: 'Across all platforms' },
+  { to: 265, suffix: 'K',  label: 'YouTube',     sub: 'Subscribers'          },
+  { to: 115, suffix: 'K',  label: 'Facebook',    sub: 'Followers'            },
+  { to: 800, suffix: '+',  label: 'Cable TV',    sub: 'Households'           },
+]
 const VALUES = [
-  { n: '01', title: 'Truth First',     titlebn: 'সত্যই প্রথম',    body: 'Every story is verified before publishing. We would rather be second than wrong.'   },
-  { n: '02', title: 'Community Voice', titlebn: 'সম্প্রদায়ের কণ্ঠ', body: 'We exist to amplify the people of Barak Valley — not just report about them.'      },
-  { n: '03', title: 'Local Impact',    titlebn: 'স্থানীয় প্রভাব',  body: 'Our work drives real change — in policy, business, and everyday lives of Silchar.' },
+  { title: 'Truth First',     body: 'Every story is verified before publishing. We would rather be second than wrong.' },
+  { title: 'Community Voice', body: 'We exist to amplify the people of Barak Valley — not just report about them.'     },
+  { title: 'Local Impact',    body: 'Our work drives real change — in policy, business, and everyday lives.'           },
 ]
 
+/* ── Page ────────────────────────────────────────────────────────────────── */
 export default function About() {
   return (
     <motion.main
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="pt-[100px]"
     >
 
-      {/* ── HERO ── */}
-      <section className="bg-[#F5F2EB] border-b-2 border-[#0D0D0D] px-5 md:px-10 lg:px-16 py-16">
+      {/* HERO */}
+      <section className="bg-[#0a0a0a] border-b border-signal/60 px-5 md:px-10 lg:px-16 py-20 md:py-28">
         <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <span className={`${S.tag} mb-5`}>About Ishan Bangla</span>
-            <h1 className={`${S.display} text-[70px] sm:text-[100px] md:text-[130px] text-[#0D0D0D] leading-[0.88] mt-2 mb-5`}>
-              The Voice of<br />
-              <span className="text-[#D91C1C]">Barak Valley.</span>
-            </h1>
-            <p className="font-bengali text-[#0D0D0D]/60 text-lg md:text-xl max-w-2xl leading-relaxed">
-              ঈশান বাংলা — বরাক উপত্যকার সবচেয়ে বিশ্বস্ত সংবাদ মাধ্যম।
-              সিলচর থেকে প্রকাশিত, কোটি মানুষের হৃদয়ে পৌঁছানো।
-            </p>
-          </motion.div>
+          <motion.h1
+            className="font-bebas text-[clamp(48px,8vw,120px)] text-white leading-[0.9] mb-5"
+            initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: EASE }}>
+            The Voice Of<br /><span className="text-signal">Barak Valley.</span>
+          </motion.h1>
+          <motion.p
+            className="font-serif text-[18px] text-white/55 max-w-xl leading-relaxed"
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: EASE, delay: 0.2 }}>
+            Ishan Bangla is the most trusted Bengali news channel in Silchar and the Barak Valley —
+            reporting the stories that matter to millions every day.
+          </motion.p>
         </div>
       </section>
 
-      {/* ── MISSION ── */}
-      <section className="bg-[#0D0D0D] border-b-2 border-[#D91C1C] px-5 md:px-10 lg:px-16 py-16">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-          >
-            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#D91C1C] border border-[#D91C1C] px-2 py-0.5 inline-block mb-6">
-              Our Mission
-            </span>
-            <h2 className={`${S.display} text-[52px] md:text-[68px] text-white leading-none mb-6`}>
-              Truthful.<br />
-              Fast.<br />
-              <span className="text-[#D91C1C]">Fearless.</span>
+      {/* MISSION */}
+      <section className="bg-warm border-b border-ink/[0.07] px-5 md:px-10 lg:px-16 py-16 md:py-24">
+        <div className="max-w-6xl mx-auto">
+          <Reveal className="mb-10">
+            <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-signal block mb-4">Our Mission</span>
+            <h2 className="font-bebas text-[clamp(40px,6vw,72px)] text-ink leading-[0.9] mb-8">
+              News That Belongs<br />To The Valley.
             </h2>
-            <p className="font-sans text-white/60 leading-relaxed text-base md:text-lg max-w-md">
-              In a region where voices are often unheard, Ishan Bangla exists to amplify
-              the truth — from breaking political news to the stories of everyday people in Silchar.
-              We reach millions because we never compromise on accuracy or speed.
-            </p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.15 }}
-            className="grid grid-cols-2 gap-3"
-          >
-            {[
-              { num: '35M+', label: 'Monthly Facebook' },
-              { num: '6M+',  label: 'Monthly YouTube'  },
-              { num: '1M+',  label: 'Monthly Instagram' },
-              { num: '1000+',label: 'Cable Homes'       },
-            ].map(({ num, label }) => (
-              <div key={label} className="border-2 border-white/15 p-5 hover:border-[#D91C1C] transition-colors duration-200">
-                <div className={`${S.display} text-[44px] text-[#D91C1C] leading-none mb-1`}>{num}</div>
-                <div className="font-mono text-[10px] uppercase tracking-widest text-white/40">{label}</div>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+              <p className="font-serif text-[17px] text-ink/70 leading-[1.7]">
+                In a region where voices are often unheard, Ishan Bangla exists to amplify the truth —
+                from breaking political news to the stories of everyday people in Silchar.
+              </p>
+              <p className="font-serif text-[17px] text-ink/70 leading-[1.7]">
+                We reach millions because we never compromise on accuracy, speed, or our commitment
+                to the communities we serve across Barak Valley.
+              </p>
+            </div>
+          </Reveal>
 
-      {/* ── VALUES ── */}
-      <section className={`${S.section} border-b-2 border-[#0D0D0D] bg-[#F5F2EB]`}>
-        <div className={S.inner}>
-          <div className="flex items-baseline gap-4 mb-10 border-b-2 border-[#0D0D0D] pb-4">
-            <h2 className={`${S.display} text-[52px] md:text-[70px]`}>Our Values</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {VALUES.map(({ n, title, titlebn, body }, i) => (
-              <motion.div
-                key={n}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: i * 0.1 }}
-                className={`${S.card} p-7`}
-              >
-                <div className={`${S.display} text-[80px] text-[#D91C1C] leading-none mb-4`}>{n}</div>
-                <div className={`${S.display} text-3xl mb-1`}>{title}</div>
-                <div className="font-bengali text-sm text-[#D91C1C] mb-3">{titlebn}</div>
-                <p className="font-sans text-sm text-[#0D0D0D]/60 leading-relaxed">{body}</p>
+          {/* Stat grid */}
+          <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-px bg-ink/[0.08] border border-ink/[0.08]">
+            {STATS.map((s, i) => (
+              <motion.div key={s.label}
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={VP} transition={{ duration: 0.6, delay: i * 0.1, ease: EASE }}
+                className="bg-warm px-6 py-8 text-center">
+                <div className="font-bebas text-[clamp(38px,4.5vw,54px)] text-signal leading-none tabular-nums mb-1">
+                  <CountUp to={s.to} suffix={s.suffix} />
+                </div>
+                <div className="font-bebas text-[17px] text-ink leading-tight">{s.label}</div>
+                <div className="font-mono text-[9px] uppercase tracking-widest text-ink/40 mt-1">{s.sub}</div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CONTACT ── */}
-      <section className="bg-[#0D0D0D] px-5 md:px-10 lg:px-16 py-16">
+      {/* VALUES */}
+      <section className="bg-[#0a0a0a] border-b border-white/[0.05] px-5 md:px-10 lg:px-16 py-16 md:py-24">
         <div className="max-w-6xl mx-auto">
-          <motion.h2
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className={`${S.display} text-[52px] md:text-[80px] text-white mb-10 border-b border-white/10 pb-6`}
-          >
-            Get In Touch
-          </motion.h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-10">
-            {[
-              { label: 'Email',     value: 'ishanbanglanews@gmail.com',  href: 'mailto:ishanbanglanews@gmail.com'                          },
-              { label: 'Phone',     value: '+91 93956 16617',            href: 'tel:+919395616617'                                         },
-              { label: 'Facebook',  value: 'Ishan Bangla News',          href: 'https://facebook.com/profile.php?id=100063811603096'       },
-              { label: 'Instagram', value: '@ishan_banglanews',          href: 'https://www.instagram.com/ishan_banglanews/'               },
-              { label: 'WhatsApp',  value: '+91 93956 16617',            href: 'https://wa.me/919395616617'                                },
-              { label: 'Location',  value: 'Silchar, Assam, India',      href: '#'                                                         },
-            ].map(({ label, value, href }) => (
-              <a
-                key={label}
-                href={href}
-                className="border-2 border-white/15 p-6 hover:border-[#D91C1C] transition-colors duration-200 group"
-              >
-                <div className="font-mono text-[10px] uppercase tracking-widest text-white/30 mb-2">{label}</div>
-                <div className="font-display text-xl text-white group-hover:text-[#D91C1C] transition-colors duration-150">{value}</div>
-              </a>
+          <Reveal className="mb-14">
+            <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-signal block mb-4">Our Values</span>
+            <h2 className="font-bebas text-[clamp(40px,6vw,72px)] text-white leading-[0.9]">
+              Three Things.<br />No Compromise.
+            </h2>
+          </Reveal>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-[clamp(28px,4vw,64px)]">
+            {VALUES.map((v, i) => (
+              <Reveal key={v.title} delay={i * 0.12}>
+                <div className="border-t-2 border-signal pt-6">
+                  <h3 className="font-bebas text-[28px] text-white mb-3 tracking-wide">{v.title}</h3>
+                  <p className="font-serif text-[15px] text-white/55 leading-[1.7]">{v.body}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
-          <div className="flex flex-wrap gap-4">
-            <Link to="/advertise" className={S.btnRed}>Start Advertising →</Link>
-            <Link to="/report" className={`${S.btnOutline} !text-white !border-white/40 [box-shadow:4px_4px_0_rgba(255,255,255,0.2)]`}>
-              Report News →
+        </div>
+      </section>
+
+      {/* CONTACT */}
+      <section className="bg-warm border-b border-ink/[0.07] px-5 md:px-10 lg:px-16 py-16 md:py-24">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-start">
+          <Reveal>
+            <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-signal block mb-4">Get In Touch</span>
+            <h2 className="font-bebas text-[clamp(48px,7vw,80px)] text-ink leading-[0.88] mb-10">Let's Talk.</h2>
+            <ul className="flex flex-col gap-7">
+              <li>
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink/40 block mb-1.5">WhatsApp</span>
+                <a href="https://wa.me/919395616617" target="_blank" rel="noopener noreferrer"
+                  className="font-serif text-[20px] text-ink hover:text-signal transition-colors duration-150">
+                  +91 93956 16617
+                </a>
+              </li>
+              <li>
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink/40 block mb-1.5">Email</span>
+                <a href="mailto:ishanbanglanews@gmail.com"
+                  className="font-serif text-[18px] text-ink hover:text-signal transition-colors duration-150">
+                  ishanbanglanews@gmail.com
+                </a>
+              </li>
+              <li>
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink/40 block mb-1.5">Location</span>
+                <span className="font-serif text-[18px] text-ink/65">Silchar, Assam, India</span>
+              </li>
+            </ul>
+          </Reveal>
+
+          <Reveal delay={0.15} className="flex flex-col gap-4 md:pt-[82px]">
+            <Link to="/advertise"
+              className="flex items-center justify-between border-2 border-ink bg-signal px-8 pb-[14px] pt-[18px] font-bebas text-[22px] leading-none tracking-wide text-white transition-transform duration-200 hover:-translate-y-[3px] group">
+              Advertise With Us
+              <span className="text-white/60 group-hover:translate-x-1 transition-transform duration-150">→</span>
             </Link>
-          </div>
+            <Link to="/report"
+              className="flex items-center justify-between border-2 border-ink bg-ink px-8 pb-[14px] pt-[18px] font-bebas text-[22px] leading-none tracking-wide text-white transition-transform duration-200 hover:-translate-y-[3px] group">
+              Report News
+              <span className="text-white/60 group-hover:translate-x-1 transition-transform duration-150">→</span>
+            </Link>
+          </Reveal>
         </div>
       </section>
     </motion.main>

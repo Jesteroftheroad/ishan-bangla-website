@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
+import { Wordmark } from './Wordmark'
 
 const LINKS = [
   { to: '/',          label: 'Home'      },
@@ -32,13 +33,9 @@ export default function Navbar() {
         <div className="bg-[#0D0D0D] border-b border-white/[0.07]">
           <div className="max-w-6xl mx-auto px-5 md:px-10 h-[72px] grid grid-cols-[auto_1fr_auto] items-center gap-4">
 
-            {/* LEFT — Logo */}
-            <Link to="/" className="flex items-center group">
-              <img
-                src="/assets/logo.png"
-                alt="Ishan Bangla News"
-                className="h-[58px] w-auto object-contain transition-opacity duration-200 group-hover:opacity-75"
-              />
+            {/* LEFT — Wordmark */}
+            <Link to="/" className="flex items-center transition-opacity duration-200 hover:opacity-80">
+              <Wordmark size="md" />
             </Link>
 
             {/* CENTER — Nav (desktop) */}

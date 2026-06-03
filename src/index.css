@@ -17,6 +17,8 @@
   --color-brand:     #1b3ec8;   /* only "ঈশান" in the hero    */
   --color-wa:        #25d366;   /* WhatsApp affordances only  */
   --color-surface:   #141414;   /* dark cinematic card fill   */
+  --color-warm:      #f7f3ec;   /* Home warm-white sections   */
+  --color-black:     #0a0a0a;   /* Home cinematic hero/dark   */
   --color-gold:      #c4870a;
   --color-smoke:     #e8e5de;
 
@@ -86,6 +88,55 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .grain { animation: none; }
+  }
+
+  /* ---- Home: cinematic hero texture ---- */
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(60% 50% at 30% 30%, rgba(40, 40, 46, 0.7), transparent 70%),
+      radial-gradient(50% 50% at 75% 65%, rgba(30, 32, 40, 0.6), transparent 70%),
+      var(--color-black);
+    animation: bgDrift 24s ease-in-out infinite alternate;
+  }
+  .hero-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10,10,10,0.4), rgba(10,10,10,0.1) 40%, rgba(10,10,10,0.85));
+  }
+  @keyframes bgDrift {
+    from { transform: scale(1.05) translate(0, 0); }
+    to   { transform: scale(1.12) translate(-2%, -2%); }
+  }
+
+  /* ---- Home: animated scroll indicator ---- */
+  .scroll-line {
+    position: relative;
+    width: 1px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+  }
+  .scroll-line::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    animation: scrollDot 2s ease-in-out infinite;
+  }
+  @keyframes scrollDot {
+    0%        { transform: translateY(-10px); }
+    60%, 100% { transform: translateY(28px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-bg, .scroll-line::after { animation: none; }
   }
 }
 

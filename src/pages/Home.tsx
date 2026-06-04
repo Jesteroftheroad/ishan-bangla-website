@@ -91,13 +91,29 @@ function IGIcon() {
 /* ── Section 1: Hero ─────────────────────────────────────────────────────── */
 function Hero() {
   return (
-    <section className="relative flex h-screen min-h-[600px] w-full flex-col items-center justify-center overflow-hidden">
-      <div className="hero-bg" aria-hidden />
+    <section
+      className="relative flex h-screen min-h-[600px] w-full flex-col items-center justify-center overflow-hidden"
+      style={{
+        backgroundImage: "url('/assets/hero-silchar.png')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      {/* Dark gradient overlay */}
+      <div
+        className="absolute inset-0 z-[1]"
+        style={{
+          background: 'linear-gradient(to bottom, rgba(10,10,10,0.7) 0%, rgba(10,10,10,0.4) 40%, rgba(10,10,10,0.8) 100%)',
+        }}
+        aria-hidden
+      />
 
       {/* Title */}
       <div className="relative z-[2] px-6 text-center">
         <motion.h1
           className="font-bengali text-[clamp(72px,14vw,190px)] font-extrabold leading-[0.9] -tracking-[2px] [white-space:nowrap]"
+          style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
           initial={{ opacity: 0, filter: 'blur(18px)' }}
           animate={{ opacity: 1, filter: 'blur(0px)' }}
           transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
@@ -106,7 +122,8 @@ function Hero() {
           <span className="text-signal"> বাংলা</span>
         </motion.h1>
         <motion.p
-          className="mt-5 font-bebas text-[17px] tracking-[0.32em] text-white/45 md:mt-8"
+          className="mt-5 font-bebas text-[17px] tracking-[0.32em] text-white/55 md:mt-8"
+          style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: EASE, delay: 0.9 }}
@@ -117,7 +134,7 @@ function Hero() {
 
       {/* Bottom strip — tagline + social icons + scroll indicator */}
       <motion.div
-        className="absolute inset-x-0 bottom-0 z-[2] flex h-14 items-center justify-between border-t border-white/10 px-5 md:px-10 lg:px-16"
+        className="absolute inset-x-0 bottom-0 z-[2] flex h-14 items-center justify-between border-t border-white/10 px-5 md:px-10 lg:px-16 backdrop-blur-sm"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: EASE, delay: 1.5 }}

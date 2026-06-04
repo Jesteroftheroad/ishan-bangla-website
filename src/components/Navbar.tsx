@@ -31,7 +31,7 @@ export default function Navbar() {
 
         {/* ── ROW 1: Main Navbar ── */}
         <div className="bg-[#0D0D0D] border-b border-white/[0.07]">
-          <div className="max-w-6xl mx-auto px-5 md:px-10 h-[72px] grid grid-cols-[auto_1fr_auto] items-center gap-4">
+          <div className="max-w-6xl mx-auto px-5 md:px-10 h-[60px] grid grid-cols-[auto_1fr_auto] items-center gap-4">
 
             {/* LEFT — Wordmark */}
             <Link to="/" className="flex items-center transition-opacity duration-200 hover:opacity-80">
@@ -114,21 +114,19 @@ export default function Navbar() {
         </div>
 
         {/* ── ROW 2: Breaking News Ticker ── */}
-        <div className="bg-[#B8141A] flex items-center overflow-hidden h-7">
+        <div className="bg-[#D91C1C] flex items-center overflow-hidden h-8 border-b border-[#0D0D0D]">
           {/* Label */}
           <div className="shrink-0 flex items-center gap-1.5 px-3 border-r border-white/20 h-full bg-[#8C0E13]">
-            <span className="text-white text-[10px]">⚡</span>
-            <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-white font-medium">Breaking</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-white font-medium">⚡ Breaking</span>
           </div>
           {/* Scrolling text */}
           <div className="flex-1 overflow-hidden relative">
-            {/* fade edges */}
-            <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[#B8141A] to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-[#B8141A] to-transparent z-10 pointer-events-none" />
+            <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-[#D91C1C] to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-[#D91C1C] to-transparent z-10 pointer-events-none" />
             <div className="ticker-inner flex items-center whitespace-nowrap">
               {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
-                <span key={i} className="inline-flex items-center gap-3 px-6 font-sans text-[11px] text-white/85 tracking-wide">
-                  <span className="text-white/30 text-[8px]">◆</span>
+                <span key={i} className="inline-flex items-center gap-3 px-6 font-mono text-[12px] text-white tracking-wide">
+                  <span className="text-white/40 text-[8px]">◆</span>
                   {item}
                 </span>
               ))}
@@ -145,7 +143,7 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="fixed top-[99px] inset-x-0 z-40 bg-[#0D0D0D] border-b border-white/[0.08] md:hidden"
+            className="fixed top-[92px] inset-x-0 z-40 bg-[#0D0D0D] border-b border-white/[0.08] md:hidden"
           >
             <nav className="flex flex-col px-6 py-4">
               {LINKS.map(({ to, label }) => (

@@ -649,7 +649,7 @@ export default function Advertise() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="pt-[100px]"
+      className="pt-[92px]"
     >
       {/* subtle film grain overlay */}
       <div className="grain" aria-hidden />

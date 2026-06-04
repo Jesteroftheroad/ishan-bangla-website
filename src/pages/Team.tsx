@@ -168,7 +168,7 @@ export default function Team() {
     <motion.main
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="pt-[100px]"
+      className="pt-[92px]"
     >
       {/* HERO */}
       <section className="bg-[#0a0a0a] border-b border-signal/60 px-5 md:px-10 lg:px-16 py-20 md:py-28">

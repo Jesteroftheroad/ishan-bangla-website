@@ -97,12 +97,13 @@ function Hero() {
       {/* Title */}
       <div className="relative z-[2] px-6 text-center">
         <motion.h1
-          className="font-bengali text-[clamp(72px,14vw,190px)] font-extrabold leading-[0.9] -tracking-[2px] text-white [white-space:nowrap]"
+          className="font-bengali text-[clamp(72px,14vw,190px)] font-extrabold leading-[0.9] -tracking-[2px] [white-space:nowrap]"
           initial={{ opacity: 0, filter: 'blur(18px)' }}
           animate={{ opacity: 1, filter: 'blur(0px)' }}
           transition={{ duration: 1.2, ease: EASE, delay: 0.2 }}
         >
-          <span className="text-brand">ঈশান</span> বাংলা
+          <span className="text-white">ঈশান</span>
+          <span className="text-signal"> বাংলা</span>
         </motion.h1>
         <motion.p
           className="mt-5 font-bebas text-[17px] tracking-[0.32em] text-white/45 md:mt-8"
@@ -371,7 +372,7 @@ export default function Home() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="pt-[100px] bg-black"
+      className="pt-[92px] bg-black"
     >
       <div className="grain" aria-hidden />
       <Hero />

@@ -14,7 +14,7 @@
   --color-parchment: #f5f2eb;
   --color-ink:       #0d0d0d;
   --color-signal:    #d91c1c;   /* primary CTA / accents      */
-  --color-brand:     #1b3ec8;   /* only "ঈশান" in the hero    */
+  /* --color-brand removed: blue (#1b3ec8) not used in design */
   --color-wa:        #25d366;   /* WhatsApp affordances only  */
   --color-surface:   #141414;   /* dark cinematic card fill   */
   --color-warm:      #f7f3ec;   /* Home warm-white sections   */

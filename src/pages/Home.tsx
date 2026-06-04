@@ -122,13 +122,13 @@ function Hero() {
           <span className="text-signal"> বাংলা</span>
         </motion.h1>
         <motion.p
-          className="mt-5 font-bebas text-[17px] tracking-[0.32em] text-white/55 md:mt-8"
-          style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}
+          className="mt-5 font-bebas text-[18px] tracking-[0.3em] text-white/90 md:mt-8"
+          style={{ textShadow: '0 2px 30px rgba(0,0,0,0.8)' }}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: EASE, delay: 0.9 }}
         >
-          THE VOICE OF BARAK VALLEY
+          BARAK VALLEY'S FASTEST GROWING MEDIA CHANNEL
         </motion.p>
       </div>
 

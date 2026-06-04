@@ -5,7 +5,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, animate, useInView, type Variants } from 'motion/react'
-import { useYouTubeVideos, fmtDate, fmtViews } from '../hooks/useYouTubeVideos'
 
 /* ── Motion primitives ───────────────────────────────────────────────────── */
 const EASE: [number, number, number, number] = [0.2, 0.8, 0.2, 1]
@@ -203,86 +202,97 @@ function Statement() {
   )
 }
 
-/* ── Section 3: Latest Videos (YouTube API) ──────────────────────────────── */
-function SkeletonCard() {
-  return (
-    <div className="animate-pulse">
-      <div className="aspect-video bg-white/[0.06] rounded-sm mb-4" />
-      <div className="h-3 bg-white/[0.04] rounded mb-2 w-1/4" />
-      <div className="h-5 bg-white/[0.06] rounded mb-1.5" />
-      <div className="h-5 bg-white/[0.04] rounded w-3/4 mb-3" />
-      <div className="h-3 bg-white/[0.04] rounded w-1/3" />
-    </div>
-  )
-}
+/* ── Section 3: Top Videos (hardcoded) ──────────────────────────────────── */
+const TOP_VIDEOS = [
+  {
+    id:    'qFme8jwBii4',
+    title: 'বিধায়ক নির্বাচিত হয়ে ঈশান বাংলায় প্রথম সাক্ষাৎকারে কি বললেন আমিনুল হক লস্কর?',
+    tag:   'Interview',
+  },
+  {
+    id:    'UW9D5JXmBHg',
+    title: 'মতামত অনুষ্ঠানে অভিজিৎ ভট্টাচার্যের মুখোমুখি তৃণমূল সাংসদ সুস্মিতা দেব',
+    tag:   'Opinion',
+  },
+  {
+    id:    '0f1wswXBYyQ',
+    title: 'মতামত অনুষ্ঠানে অভিজিৎ ভট্টাচার্যের মুখোমুখি তৃণমূল কংগ্রেসের যাদবপুর লোকসভার সাংসদ সায়নী ঘোষ',
+    tag:   'Opinion',
+  },
+  {
+    id:    'cszFbJDtF3o',
+    title: 'POINT BLANK | নেতাদের উড়েছে ঘুম! আর্শোলা বাহিনীর এন্ট্রিতে কাঁপছে দিল্লি!',
+    tag:   'Point Blank',
+  },
+  {
+    id:    '9AFvbDE97bA',
+    title: 'ISHAN BANGLA MID-DAY EXPRESS 08-05-2026',
+    tag:   'Bulletin',
+  },
+  {
+    id:    'vXCqZuXLaGU',
+    title: 'OPINION POLL | AI বিশ্লেষণ, জনতার মতামত, ধলাইর প্রার্থীদের নিয়ে',
+    tag:   'Opinion Poll',
+  },
+]
 
-function VideoCard({ video }: { video: { id: string; title: string; thumbnail: string; publishedAt: string; viewCount: string; url: string } }) {
+function VideoCard({ id, title, tag, delay }: { id: string; title: string; tag: string; delay: number }) {
+  const url = `https://www.youtube.com/watch?v=${id}`
+  const thumb = `https://img.youtube.com/vi/${id}/hqdefault.jpg`
+
   return (
     <motion.a
-      href={video.url}
+      href={url}
       target="_blank"
       rel="noopener noreferrer"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.6, ease: EASE }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.6, delay, ease: EASE }}
       className="group block"
     >
       {/* Thumbnail */}
       <div className="relative aspect-video overflow-hidden bg-white/[0.04] mb-4">
         <img
-          src={video.thumbnail}
-          alt={video.title}
+          src={thumb}
+          alt={title}
           className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
           loading="lazy"
         />
-        {/* Play button overlay */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        {/* Play button */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <div className="w-12 h-12 rounded-full bg-signal/90 flex items-center justify-center">
             <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white ml-0.5"><path d="M8 5v14l11-7z"/></svg>
           </div>
         </div>
-        {/* Bottom red line on hover */}
+        {/* Red sweep on hover */}
         <div className="absolute bottom-0 inset-x-0 h-[2px] bg-signal scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-left" />
+        {/* Tag chip */}
+        <div className="absolute top-3 left-3">
+          <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-white bg-signal/90 px-2 py-0.5">
+            {tag}
+          </span>
+        </div>
       </div>
-      {/* Meta */}
-      <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-signal block mb-1.5">Latest</span>
-      <h3 className="font-bebas text-[20px] leading-[1.1] text-white group-hover:text-signal transition-colors duration-150 mb-2 line-clamp-2">
-        {video.title}
+      {/* Title */}
+      <h3 className="font-bengali text-[15px] leading-snug text-white/85 group-hover:text-white transition-colors duration-150 line-clamp-2">
+        {title}
       </h3>
-      <div className="flex items-center gap-3 font-mono text-[10px] text-white/30">
-        <span>{fmtDate(video.publishedAt)}</span>
-        {video.viewCount && <><span>·</span><span>{fmtViews(video.viewCount)}</span></>}
-      </div>
     </motion.a>
   )
 }
 
-function FallbackCard({ i }: { i: number }) {
-  return (
-    <a href={YT} target="_blank" rel="noopener noreferrer" className="group block">
-      <div className="aspect-video bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mb-4 group-hover:border-signal/30 transition-colors duration-200">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-white/25">Watch on YouTube →</span>
-      </div>
-      <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-signal block mb-1.5">Ishan Bangla</span>
-      <h3 className="font-bebas text-[20px] leading-tight text-white/50">Latest video {i + 1}</h3>
-    </a>
-  )
-}
-
 function LatestVideos() {
-  const { videos, loading, error } = useYouTubeVideos(6)
-
   return (
     <section className="bg-[#0a0a0a] px-5 py-[clamp(80px,14vh,140px)] md:px-10 lg:px-16">
       <div className="mx-auto max-w-[1200px]">
         <Reveal className="mb-10 md:mb-14 flex items-end justify-between gap-4">
           <div>
             <span className="font-mono text-[11px] uppercase tracking-[0.28em] text-signal inline-flex items-center gap-3 mb-4">
-              <span className="h-0.5 w-8 bg-signal" />Latest Coverage
+              <span className="h-0.5 w-8 bg-signal" />Most Viewed
             </span>
             <h2 className="font-bebas text-[clamp(40px,6vw,72px)] leading-none text-white">
-              From the Newsroom
+              Top Videos
             </h2>
           </div>
           <a href={YT} target="_blank" rel="noopener noreferrer"
@@ -292,12 +302,9 @@ function LatestVideos() {
         </Reveal>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-          {loading
-            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-            : error
-            ? Array.from({ length: 6 }).map((_, i) => <FallbackCard key={i} i={i} />)
-            : videos.map(v => <VideoCard key={v.id} video={v} />)
-          }
+          {TOP_VIDEOS.map((v, i) => (
+            <VideoCard key={v.id} {...v} delay={i * 0.08} />
+          ))}
         </div>
       </div>
     </section>

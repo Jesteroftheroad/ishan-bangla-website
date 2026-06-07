@@ -4,6 +4,7 @@
    ========================================================================= */
 
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, animate, useInView, type Variants } from 'motion/react'
 
 /* ── Motion primitives ───────────────────────────────────────────────────── */
@@ -216,23 +217,38 @@ const TOP_VIDEOS = [
   },
   {
     id:    '0f1wswXBYyQ',
-    title: 'মতামত অনুষ্ঠানে অভিজিৎ ভট্টাচার্যের মুখোমুখি তৃণমূল কংগ্রেসের যাদবপুর লোকসভার সাংসদ সায়নী ঘোষ',
+    title: 'মতামত অনুষ্ঠানে অভিজিৎ ভট্টাচার্যের মুখোমুখি তৃণমূল কংগ্রেসের যাদবপুর লোকসভার সাংসদ সাঈনী ঘোষ।',
     tag:   'Opinion',
   },
   {
     id:    'cszFbJDtF3o',
-    title: 'POINT BLANK | নেতাদের উড়েছে ঘুম! আর্শোলা বাহিনীর এন্ট্রিতে কাঁপছে দিল্লি!',
+    title: 'POINT BLANK | নেতাদের উড়েছে ঘুম! আরশোলা বাহিনীর এন্ট্রিতে কাঁপছে দিল্লি!',
     tag:   'Point Blank',
   },
   {
     id:    '9AFvbDE97bA',
-    title: 'ISHAN BANGLA MID-DAY EXPRESS 08-05-2026',
+    title: 'ISHAN BANGLA MID-DAY EXPRESS 08-05-2026.',
     tag:   'Bulletin',
   },
   {
     id:    'vXCqZuXLaGU',
     title: 'OPINION POLL | AI বিশ্লেষণ, জনতার মতামত, ধলাইর প্রার্থীদের নিয়ে',
     tag:   'Opinion Poll',
+  },
+  {
+    id:    'DonjE3KSVAs',
+    title: 'DAILY EVENING SHOW | "ওসমান হাদীর হত্যা কারা করিয়েছে জানি" — মমতা বন্দ্যোপাধ্যায়ের মন্তব্য নিয়ে',
+    tag:   'Evening Show',
+  },
+  {
+    id:    'KuaEydC5_Uw',
+    title: 'DAILY EVENING SHOW | রাজদীপ রায় কি শিলচরে জিততে পারবেন!',
+    tag:   'Evening Show',
+  },
+  {
+    id:    'SkEgzQDOtkc',
+    title: 'DAILY EVENING SHOW | কাল ভোট। বরাকের আসনগুলিতে কি হতে পারে?',
+    tag:   'Evening Show',
   },
 ]
 
@@ -368,10 +384,10 @@ function AdvertiseCta() {
           </Reveal>
 
           <Reveal delay={0.4} className="flex flex-wrap gap-4">
-            <a href="/advertise"
+            <Link to="/advertise"
               className="inline-flex items-center gap-2.5 border-2 border-ink bg-ink px-8 pb-[13px] pt-[17px] font-bebas text-[22px] leading-none tracking-wide text-white transition-transform duration-200 hover:-translate-y-[3px]">
               See Ad Packages →
-            </a>
+            </Link>
             <a href={WA} target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2.5 border-2 border-ink bg-wa px-8 pb-[13px] pt-[17px] font-bebas text-[22px] leading-none tracking-wide text-ink transition-transform duration-200 hover:-translate-y-[3px]">
               WhatsApp Us
